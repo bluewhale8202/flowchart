@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+<link href="jquery.flowchart.css" rel="stylesheet" type="text/css">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="https://code.jquery.com/jquery-3.3.1.js"
+            integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+            crossorigin="anonymous"></script>
+    <script src="static/jquery-ui/jquery-ui.js"></script>
+    <script src="static/js/jquery.flowchart.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="static/jquery-ui/jquery-ui.css">
+    <link rel="stylesheet" type="text/css" href="static/jquery-ui/jquery-ui.structure.css">
+    <link rel="stylesheet" type="text/css" href="static/jquery-ui/jquery-ui.theme.css">
+    <link rel="stylesheet" href="static/css/jquery.flowchart.css">
+</head>
+<body>
+    <div style="width:500px; height:500px;" id="example"></div>
+    <button style="width:100px; height:50px;" class="add_node">노드 추가</button>
+</body>
+<script>
+$(document).ready(function() {
+    var data = {
+      operators: {
+        operator: {
+          top: 20,
+          left: 20,
+          properties: {
+            title: 'Operator',
+            inputs: {
+              input_1: {
+                label: 'Input 1',
+              },
+              input_2: {
+                label: 'Input 2',
+              }
+            },
+            outputs: {
+              output_1: {
+                label: 'Output 1',
+              },
+              output_2: {
+                label: 'Output 2',
+              },
+              output_3: {
+                label: 'Output 3',
+              }
+            }
+          }
+        }
+      }
+    };
+    // Apply the plugin on a standard, empty div...
+    // $('#example').flowchart({
+    //   data: data
+    // });
+    $('#example').flowchart({});
+});
+
+var $flowchart = $('#example');
+
+var operatorI = 1;
+
+$(".add_node").click(function() {
+  var operatorId = 'created_operator_' + operatorI;
+  var operatorData = {
+    top: 200,
+    left: 200,
+    properties: {
+      title: 'Operator ' + (operatorI),
+      inputs: {
+        input_1: {
+          label: 'In',
+          multiple: true,
+        }
+      },
+      outputs: {
+        output_1: {
+          label: 'Out',
+          multiple: true,
+        }
+      }
+    }
+  };
+
+  operatorI++;
+
+  $('#example').flowchart('createOperator', operatorId, operatorData);
+});
+
+</script>
+</html>
