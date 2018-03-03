@@ -21,51 +21,92 @@
     <link rel="stylesheet" href="static/css/jquery.flowchart.css">
 </head>
 <body>
-    <div style="width:500px; height:500px;" id="example"></div>
-    <button style="width:100px; height:50px;" class="add_node">노드 추가</button>
+    <div style="width:1000px; height:500px;" id="example"></div>
+    <button style="width:100px; height:50px;" class="add_node">ë…¸ë“œ ì¶”ê°€</button>
+
+    <div class="operator_contents_edit">
+        <label>Operator's content: </label>
+        <textarea type="text">
+        <button>변경</button>
+    </div>
 </body>
 <script>
 $(document).ready(function() {
     var data = {
-      operators: {
-        operator: {
-          top: 20,
-          left: 20,
-          properties: {
-            title: 'Operator',
-            inputs: {
-              input_1: {
-                label: 'Input 1',
-              },
-              input_2: {
-                label: 'Input 2',
+      "operators": {
+        "created_operator_1": {
+          "top": 120,
+          "left": 100,
+          "properties": {
+            "title": "Operator 1",
+            "contents": "example content1",
+            "inputs": {
+              "input_1": {
+                "label": "In",
+                "multiple": true
               }
             },
-            outputs: {
-              output_1: {
-                label: 'Output 1',
-              },
-              output_2: {
-                label: 'Output 2',
-              },
-              output_3: {
-                label: 'Output 3',
+            "outputs": {
+              "output_1": {
+                "label": "Out",
+                "multiple": true
+              }
+            }
+          }
+        },
+        "created_operator_2": {
+          "top": 280,
+          "left": 480,
+          "properties": {
+            "title": "Operator 2",
+            "contents": "example content2",
+            "inputs": {
+              "input_1": {
+                "label": "In",
+                "multiple": true
+              }
+            },
+            "outputs": {
+              "output_1": {
+                "label": "Out",
+                "multiple": true
               }
             }
           }
         }
-      }
-    };
+      },
+      "links": {
+        "0": {
+          "fromOperator": "created_operator_1",
+          "fromConnector": "output_1",
+          "fromSubConnector": 0,
+          "toOperator": "created_operator_2",
+          "toConnector": "input_1",
+          "toSubConnector": 0
+        }
+      },
+      "operatorTypes": {}
+    }
     // Apply the plugin on a standard, empty div...
     // $('#example').flowchart({
     //   data: data
     // });
-    $('#example').flowchart({});
+    $('#example').flowchart({
+        data: data,
+        onOperatorSelect: function(operatorId) {
+            $('.operator_contents_edit').show();
+            $('.operator_contents_edit textarea').val(
+                $flowchart.flowchart('getOperatorContents', operatorId));
+            console.log($flowchart.flowchart('getOperatorContents', operatorId));
+            return true;
+        },
+    });
 });
 
 var $flowchart = $('#example');
 
-var operatorI = 1;
+// Id matters!
+var operatorI = 3;
 
 $(".add_node").click(function() {
   var operatorId = 'created_operator_' + operatorI;
@@ -74,6 +115,7 @@ $(".add_node").click(function() {
     left: 200,
     properties: {
       title: 'Operator ' + (operatorI),
+      contents: "example contents",
       inputs: {
         input_1: {
           label: 'In',
