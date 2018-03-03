@@ -145,5 +145,6 @@
 
 .flowchart-operator .flowchart-operator-inputs, .flowchart-default-operator .flowchart-operator-outputs {
     display: table-cell;
-    width: 50%;
+    color: #ccc;
+    width: 20%;
 }

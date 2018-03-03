@@ -9,6 +9,7 @@ $(function () {
             data: {},
             distanceFromArrow: 3,
             defaultOperatorClass: 'flowchart-default-operator',
+            defaultOperatorWidth: "200px",
             defaultLinkColor: '#3366ff',
             defaultSelectedLinkColor: 'black',
             linkWidth: 10,
@@ -381,6 +382,11 @@ $(function () {
             group.appendChild(shape_rect);
             linkData.internal.els.rect = shape_rect;
 
+            var shape_text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            shape_text.innerHTML = 'Choice';
+            group.appendChild(shape_text);
+            linkData.internal.els.text = shape_text;
+
             this._refreshLinkPositions(linkId);
             this.uncolorizeLink(linkId);
         },
@@ -435,6 +441,9 @@ $(function () {
             linkData.internal.els.rect.setAttribute("width", offsetFromX + distanceFromArrow + 1);
             linkData.internal.els.rect.setAttribute("height", this.options.linkWidth);
 
+            linkData.internal.els.text.setAttribute("x", fromX + this.options.linkWidth*2);
+            linkData.internal.els.text.setAttribute("y", fromY + this.options.linkWidth/2);
+
         },
 
         getOperatorCompleteData: function (operatorData) {
@@ -483,6 +492,11 @@ $(function () {
             var $operator_inputs = $('<div class="flowchart-operator-inputs"></div>');
             $operator_inputs.appendTo($operator_inputs_outputs);
 
+            // customized
+            var $operator_contents = $('<div class="operator_contents"></div>');
+            $operator_contents.text(infos.contents);
+            $operator_contents.appendTo($operator_inputs_outputs);
+
             var $operator_outputs = $('<div class="flowchart-operator-outputs"></div>');
             $operator_outputs.appendTo($operator_inputs_outputs);
 
@@ -496,6 +510,7 @@ $(function () {
             var fullElement = {
                 operator: $operator,
                 title: $operator_title,
+                // contents: $operator_contents,
                 connectorSets: connectorSets,
                 connectors: connectors,
                 connectorArrows: connectorArrows,
@@ -513,6 +528,13 @@ $(function () {
                 connectorSets[connectorKey] = $operator_connector_set;
 
                 self._createSubConnector(connectorKey, connectorInfos, fullElement);
+            }
+
+            // customized
+            if (operatorData.hasOwnProperty('width') ){
+                $operator.css("width", operatorData.width);
+            } else{
+                $operator.css("width", this.options.defaultOperatorWidth);
             }
 
             for (var key_i in infos.inputs) {
@@ -824,6 +846,12 @@ $(function () {
             this.colorizeLink(linkId, this.getLinkMainColor(linkId));
         },
 
+        // Cusomized method
+        setLinkText: function (linkId, text) {
+            var linkData = this.data.links[linkId];
+            linkData.internal.els.text.innerHTML = text;
+        },
+
         _connecterMouseOver: function (linkId) {
             if (this.selectedLinkId != linkId) {
                 this.colorizeLink(linkId, this._shadeColor(this.getLinkMainColor(linkId), -0.4));
@@ -992,6 +1020,21 @@ $(function () {
 
         getOperatorTitle: function (operatorId) {
             return this.data.operators[operatorId].internal.properties.title;
+        },
+
+        // customized
+        setOperatorContents: function (operatorId, contents) {
+            this.data.operators[operatorId].internal.els.contents.html(content);
+            if (typeof this.data.operators[operatorId].properties == 'undefined') {
+                this.data.operators[operatorId].properties = {};
+            }
+            this.data.operators[operatorId].properties.contents = contents;
+            this._refreshInternalProperties(this.data.operators[operatorId]);
+            // this.callbackEvent('afterChange', ['operator_title_change']);
+        },
+
+        getOperatorContents: function (operatorId) {
+            return this.data.operators[operatorId].internal.properties.contents;
         },
 
         setOperatorData: function (operatorId, operatorData) {
