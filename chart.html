@@ -1,44 +1,132 @@
 <!DOCTYPE html>
 <html lang="en">
-
-
-<link href="jquery.flowchart.css" rel="stylesheet" type="text/css">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
+
     <script src="https://code.jquery.com/jquery-3.3.1.js"
             integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
             crossorigin="anonymous"></script>
     <script src="static/jquery-ui/jquery-ui.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+            crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+            crossorigin="anonymous"></script>
     <script src="static/js/jquery.flowchart.js"></script>
 
     <link rel="stylesheet" type="text/css" href="static/jquery-ui/jquery-ui.css">
     <link rel="stylesheet" type="text/css" href="static/jquery-ui/jquery-ui.structure.css">
     <link rel="stylesheet" type="text/css" href="static/jquery-ui/jquery-ui.theme.css">
     <link rel="stylesheet" href="static/css/jquery.flowchart.css">
-</head>
-<body>
-    <div style="width:1000px; height:500px;" id="example"></div>
-    <button style="width:100px; height:50px;" class="add_node">노드 추가</button>
 
-    <div class="operator_contents_edit">
-        <label>Operator's content: </label>
-        <textarea type="text"></textarea>
-        <button>변경</button>
+    <!-- bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+
+<style>
+</style>
+
+<body>
+    <div style="width:1500px; height:500px; border: 1px solid gray;" id="chart"></div>
+
+    <div class="container control col-md-12">
+        <div class="col-md-1"></div>
+        <div class="col-md-4">
+            <div class="contents_edit" style="display:none">
+                <label>내용 변경하기</label>
+                <textarea type="text" class="col-xs-12"></textarea><br>
+                <button>확인</button>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="link_edit" style="display:none">
+                <label>link's content: </label>
+                <textarea type="text" class="col-xs-12"></textarea>
+                <button>변경</button>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div style="height:5vh"></div>
+            <button class="add_node">노드 추가</button>
+            <button class="delete_selected">delete selected</button>
+        </div>
+        <div class="col-md-1"></div>
     </div>
+
 </body>
+
 <script>
+
 $(document).ready(function() {
+    var $chart = $('#chart');
+    var $contents_edit = $(".contents_edit");
+    var $link_edit = $(".link_edit");
+    var $delete_selected = $("button.delete_selected");
+
+    $contents_edit.find("button").click(function(){
+        var selectedOperatorId = $chart.flowchart('getSelectedOperatorId');
+        var contents = $contents_edit.find("textarea").val()
+        if (selectedOperatorId != null) {
+            $chart.flowchart('setOperatorContents', selectedOperatorId, contents);
+            $contents_edit.hide();
+        }
+    });
+
+    $link_edit.find("button").click(function(){
+        var selectedLinkId = $chart.flowchart('getSelectedLinkId');
+        var contents = $link_edit.find("textarea").val()
+        if (selectedLinkId != null) {
+            $chart.flowchart('setLinkText', selectedLinkId, contents);
+            $link_edit.hide();
+        }
+    });
+
+    $delete_selected.click(function() {
+      $chart.flowchart('deleteSelected');
+    });
+
+    // Id matters!
+    var operatorI = 3;
+
+    $(".add_node").click(function() {
+      var operatorId = 'created_operator_' + operatorI;
+      var operatorData = {
+        top: 200,
+        left: 200,
+        properties: {
+          title: '-',
+          contents: "example contents",
+          inputs: {
+            input_1: {
+              label: 'In',
+              multiple: true,
+            }
+          },
+          outputs: {
+            output_1: {
+              label: 'Out',
+              multiple: true,
+            }
+          }
+        }
+      };
+      operatorI++;
+
+      $chart.flowchart('createOperator', operatorId, operatorData);
+    });
+
     var data = {
       "operators": {
         "created_operator_1": {
           "top": 120,
           "left": 100,
           "properties": {
-            "title": "Operator 1",
+            "title": "-",
             "contents": "example content1",
             "inputs": {
               "input_1": {
@@ -58,7 +146,7 @@ $(document).ready(function() {
           "top": 280,
           "left": 480,
           "properties": {
-            "title": "Operator 2",
+            "title": "-",
             "contents": "example content2",
             "inputs": {
               "input_1": {
@@ -91,50 +179,31 @@ $(document).ready(function() {
     // $('#example').flowchart({
     //   data: data
     // });
-    $('#example').flowchart({
+
+    $chart.flowchart({
         data: data,
         onOperatorSelect: function(operatorId) {
-            $('.operator_contents_edit').show();
-            $('.operator_contents_edit textarea').val(
-                $flowchart.flowchart('getOperatorContents', operatorId));
-            console.log($flowchart.flowchart('getOperatorContents', operatorId));
+            $contents_edit.show();
+            $contents_edit.find("textarea")
+                .val($chart.flowchart('getOperatorContents', operatorId));
+            return true;
+        },
+        onOperatorUnselect: function(operatorId) {
+            $contents_edit.hide();
+            return true;
+        },
+        onLinkSelect: function(linkId) {
+            $link_edit.show();
+            $link_edit.find("textarea")
+                .val($chart.flowchart('getLinkText', linkId));
+            return true;
+        },
+        onLinkUnselect: function(linkId) {
+            $link_edit.hide();
             return true;
         },
     });
 });
-
-var $flowchart = $('#example');
-
-// Id matters!
-var operatorI = 3;
-
-$(".add_node").click(function() {
-  var operatorId = 'created_operator_' + operatorI;
-  var operatorData = {
-    top: 200,
-    left: 200,
-    properties: {
-      title: 'Operator ' + (operatorI),
-      contents: "example contents",
-      inputs: {
-        input_1: {
-          label: 'In',
-          multiple: true,
-        }
-      },
-      outputs: {
-        output_1: {
-          label: 'Out',
-          multiple: true,
-        }
-      }
-    }
-  };
-
-  operatorI++;
-
-  $('#example').flowchart('createOperator', operatorId, operatorData);
-});
-
 </script>
+
 </html>

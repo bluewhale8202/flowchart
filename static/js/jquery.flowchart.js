@@ -1,6 +1,5 @@
 $(function () {
-// the widget definition, where "custom" is the namespace,
-// "colorize" the widget name
+        // <name space>.<widget name>
     $.widget("flowchart.flowchart", {
         // default options
         options: {
@@ -10,9 +9,9 @@ $(function () {
             distanceFromArrow: 3,
             defaultOperatorClass: 'flowchart-default-operator',
             defaultOperatorWidth: "200px",
-            defaultLinkColor: '#3366ff',
-            defaultSelectedLinkColor: 'black',
-            linkWidth: 10,
+            defaultLinkColor: '#6699ff',
+            defaultSelectedLinkColor: '#aa66ff',
+            linkWidth: 8,
             grid: 20,
             multipleLinksOnOutput: false,
             multipleLinksOnInput: false,
@@ -510,7 +509,7 @@ $(function () {
             var fullElement = {
                 operator: $operator,
                 title: $operator_title,
-                // contents: $operator_contents,
+                contents: $operator_contents,
                 connectorSets: connectorSets,
                 connectors: connectors,
                 connectorArrows: connectorArrows,
@@ -852,6 +851,12 @@ $(function () {
             linkData.internal.els.text.innerHTML = text;
         },
 
+        getLinkText: function (linkId, text) {
+            return this.data.links[linkId].internal.els.text.innerHTML;
+            // var linkData = this.data.links[linkId];
+            // linkData.internal.els.text.innerHTML = text;
+        },
+
         _connecterMouseOver: function (linkId) {
             if (this.selectedLinkId != linkId) {
                 this.colorizeLink(linkId, this._shadeColor(this.getLinkMainColor(linkId), -0.4));
@@ -869,6 +874,8 @@ $(function () {
                 if (!this.callbackEvent('linkUnselect', [])) {
                     return;
                 }
+                console.log(this);
+                console.log('hi');
                 this.uncolorizeLink(this.selectedLinkId, this.options.defaultSelectedLinkColor);
                 this.selectedLinkId = null;
             }
@@ -1024,7 +1031,7 @@ $(function () {
 
         // customized
         setOperatorContents: function (operatorId, contents) {
-            this.data.operators[operatorId].internal.els.contents.html(content);
+            this.data.operators[operatorId].internal.els.contents.html(contents);
             if (typeof this.data.operators[operatorId].properties == 'undefined') {
                 this.data.operators[operatorId].properties = {};
             }
