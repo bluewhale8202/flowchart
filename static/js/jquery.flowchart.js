@@ -322,6 +322,7 @@ $(function () {
             var fromConnectorId = linkData.fromConnector;
             var toOperatorId = linkData.toOperator;
             var toConnectorId = linkData.toConnector;
+            var text = linkData.text;
 
             var subConnectors = this._getSubConnectors(linkData);
             var fromSubConnector = subConnectors[0];
@@ -382,9 +383,10 @@ $(function () {
             linkData.internal.els.rect = shape_rect;
 
             var shape_text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            shape_text.innerHTML = 'Choice';
+            shape_text.innerHTML = text;
             group.appendChild(shape_text);
             linkData.internal.els.text = shape_text;
+            linkData.text = text;
 
             this._refreshLinkPositions(linkId);
             this.uncolorizeLink(linkId);
@@ -849,6 +851,7 @@ $(function () {
         setLinkText: function (linkId, text) {
             var linkData = this.data.links[linkId];
             linkData.internal.els.text.innerHTML = text;
+            linkData.text = text;
         },
 
         getLinkText: function (linkId, text) {
@@ -874,8 +877,6 @@ $(function () {
                 if (!this.callbackEvent('linkUnselect', [])) {
                     return;
                 }
-                console.log(this);
-                console.log('hi');
                 this.uncolorizeLink(this.selectedLinkId, this.options.defaultSelectedLinkColor);
                 this.selectedLinkId = null;
             }

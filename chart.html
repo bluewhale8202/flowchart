@@ -16,7 +16,9 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
             integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
             crossorigin="anonymous"></script>
+
     <script src="static/js/jquery.flowchart.js"></script>
+    <script src="static/js/flowchart_utils.js"></script>
 
     <link rel="stylesheet" type="text/css" href="static/jquery-ui/jquery-ui.css">
     <link rel="stylesheet" type="text/css" href="static/jquery-ui/jquery-ui.structure.css">
@@ -29,6 +31,10 @@
 </head>
 
 <style>
+.control{
+    background-color: #fafaff;
+    height: 20vh;
+}
 </style>
 
 <body>
@@ -53,17 +59,76 @@
         <div class="col-md-3">
             <div style="height:5vh"></div>
             <button class="add_node">노드 추가</button>
-            <button class="delete_selected">delete selected</button>
+            <button class="delete_selected">선택한 노드/링크 삭제</button>
+            <button class="get_data">get data</button>
         </div>
         <div class="col-md-1"></div>
+    </div>
+
+    <div class="col-xs-12" style="height:50vh;">
+        <div class="col-xs-3"></div>
+        <div class="col-xs-6">
+            <button class="start_question">질문 시작</button>
+            <div class="question_contents col-xs-12">
+            </div>
+            <div class="question_choices">
+                <!-- for (i = 0; i < 20; i++) {
+                    var radioBtn = $('<input type="radio" name="rbtnCount" />');
+                    radioBtn.appendTo('#target');
+                } -->
+
+            </div>
+        </div>
+        <div class="col-xs-3"></div>
     </div>
 
 </body>
 
 <script>
+// flowchart_utils.js functions
+// lastOperatorNum(tree)
+// rootOperatorIds(tree)
+// getOutLinks(tree, cur_op_id)
+// getNextOp(tree, link_id)
+
+function showQuestion(tree, cur_op){
+    var links = tree.links;
+    if (cur_op == undefined){
+        // Assuming there is only one root
+        var cur_op = rootOperatorIds(tree)[0];
+    }
+
+    console.log(tree.operators[cur_op].properties.contents);
+    var contents = tree.operators[cur_op].properties.contents;
+    $('.question_contents').text(contents);
+
+    var out_links = getOutLinks(tree, cur_op);
+    var $choices = $('.question_choices');
+    $choices.empty();
+
+    if (out_links.length == 0){ return; }
+
+    for (idx in out_links){
+        var link_id = out_links[idx];
+        var $button = $("<button class='choice col-xs-3'></button>");
+        $button.data('id', link_id);
+        $button.text(links[link_id].text);
+        $button.click(function(){
+            var tree = flowchart_widget.data;
+            var next_op = getNextOp(tree, $(this).data('id'));
+            showQuestion(tree, next_op);
+        })
+        $choices.append($button);
+    }
+}
+
+// expand screen function
+// decide screen with based on tree data
+
 
 $(document).ready(function() {
     var $chart = $('#chart');
+    // window.flowchart_widget is automatically created by flowchart constructor
     var $contents_edit = $(".contents_edit");
     var $link_edit = $(".link_edit");
     var $delete_selected = $("button.delete_selected");
@@ -90,8 +155,19 @@ $(document).ready(function() {
       $chart.flowchart('deleteSelected');
     });
 
+    $('.get_data').click(function() {
+         var data = $chart.flowchart('getData');
+         console.log(data);
+    });
+
+    $('.start_question').click(function(){
+        $('.start_question').hide();
+        showQuestion(flowchart_widget.data);
+    })
+
     // Id matters!
-    var operatorI = 3;
+    // set starting id with lastOpIds
+    var operatorI = 6;
 
     $(".add_node").click(function() {
       var operatorId = 'created_operator_' + operatorI;
@@ -127,7 +203,7 @@ $(document).ready(function() {
           "left": 100,
           "properties": {
             "title": "-",
-            "contents": "example content1",
+            "contents": "created_operator_1 example content1",
             "inputs": {
               "input_1": {
                 "label": "In",
@@ -144,10 +220,50 @@ $(document).ready(function() {
         },
         "created_operator_2": {
           "top": 280,
-          "left": 480,
+          "left": 440,
           "properties": {
             "title": "-",
-            "contents": "example content2",
+            "contents": "example content for op 2",
+            "inputs": {
+              "input_1": {
+                "label": "In",
+                "multiple": true
+              }
+            },
+            "outputs": {
+              "output_1": {
+                "label": "Out",
+                "multiple": true
+              }
+            }
+          }
+        },
+        "created_operator_3": {
+          "top": 40,
+          "left": 420,
+          "properties": {
+            "title": "-",
+            "contents": "example contents for 3!",
+            "inputs": {
+              "input_1": {
+                "label": "In",
+                "multiple": true
+              }
+            },
+            "outputs": {
+              "output_1": {
+                "label": "Out",
+                "multiple": true
+              }
+            }
+          }
+        },
+        "created_operator_6": {
+          "top": 140,
+          "left": 780,
+          "properties": {
+            "title": "-",
+            "contents": "example contents. six",
             "inputs": {
               "input_1": {
                 "label": "In",
@@ -170,15 +286,39 @@ $(document).ready(function() {
           "fromSubConnector": 0,
           "toOperator": "created_operator_2",
           "toConnector": "input_1",
-          "toSubConnector": 0
+          "toSubConnector": 0,
+          "text": "머지"
+        },
+        "1": {
+          "fromOperator": "created_operator_1",
+          "fromConnector": "output_1",
+          "fromSubConnector": 1,
+          "toOperator": "created_operator_3",
+          "toConnector": "input_1",
+          "toSubConnector": 0,
+          "text": "Choice"
+        },
+        "2": {
+          "fromOperator": "created_operator_3",
+          "fromConnector": "output_1",
+          "fromSubConnector": 0,
+          "toOperator": "created_operator_6",
+          "toConnector": "input_1",
+          "toSubConnector": 0,
+          "text": "예쓰"
+        },
+        "3": {
+          "fromOperator": "created_operator_2",
+          "fromConnector": "output_1",
+          "fromSubConnector": 0,
+          "toOperator": "created_operator_6",
+          "toConnector": "input_1",
+          "toSubConnector": 1,
+          "text": "노우"
         }
       },
       "operatorTypes": {}
     }
-    // Apply the plugin on a standard, empty div...
-    // $('#example').flowchart({
-    //   data: data
-    // });
 
     $chart.flowchart({
         data: data,
@@ -193,6 +333,7 @@ $(document).ready(function() {
             return true;
         },
         onLinkSelect: function(linkId) {
+            console.log("link selected: " + linkId);
             $link_edit.show();
             $link_edit.find("textarea")
                 .val($chart.flowchart('getLinkText', linkId));
