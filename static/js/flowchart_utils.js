@@ -1,4 +1,4 @@
-function lastOperatorNum(tree){
+function lastOperatorIdx(tree){
     var ops = tree.operators;
     var max_num = 0;
     for (id in ops){
@@ -9,6 +9,18 @@ function lastOperatorNum(tree){
         }
     }
     return max_num;
+}
+
+function getMaxXCoordinate(tree){
+    var ops = tree.operators;
+    var max_X = -1;
+    for (id in ops){
+        var X = ops[id].left
+        if (X > max_X) {
+            max_x = X;
+        }
+    }
+    return X;
 }
 
 function rootOperatorIds(tree){

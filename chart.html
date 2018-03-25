@@ -35,6 +35,10 @@
     background-color: #fafaff;
     height: 20vh;
 }
+.operator_contents{
+    overflow: hidden;
+    max-height: 150px;
+}
 </style>
 
 <body>
@@ -122,8 +126,31 @@ function showQuestion(tree, cur_op){
     }
 }
 
-// expand screen function
-// decide screen with based on tree data
+function getScreenWidth(){
+    return parseInt($(".flowchart-container").css("width").slice(0, -2));
+}
+
+function getTreeWidth(){
+    var ops =  flowchart_widget.data.operators;
+    var max = 0;
+    for (key in ops){
+        if (ops[key]["left"] > max){
+            max = ops[key]["left"];
+        }
+    }
+    return max + 400;
+}
+
+function resizeScreenWidthBy(amount){
+    var cur_width = getScreenWidth();
+    $(".flowchart-container").css("width", String(cur_width+amount)+"px");
+}
+
+function updateScreenSize(){
+    var screen = getScreenWidth();
+    var tree = getTreeWidth();
+    resizeScreenWidthBy(tree-screen);
+}
 
 
 $(document).ready(function() {
@@ -133,6 +160,7 @@ $(document).ready(function() {
     var $link_edit = $(".link_edit");
     var $delete_selected = $("button.delete_selected");
 
+    // Event binding should be done after dom ready
     $contents_edit.find("button").click(function(){
         var selectedOperatorId = $chart.flowchart('getSelectedOperatorId');
         var contents = $contents_edit.find("textarea").val()
@@ -165,12 +193,9 @@ $(document).ready(function() {
         showQuestion(flowchart_widget.data);
     })
 
-    // Id matters!
-    // set starting id with lastOpIds
-    var operatorI = 6;
-
     $(".add_node").click(function() {
-      var operatorId = 'created_operator_' + operatorI;
+      var operatorId = 'created_operator_' +
+                       (lastOperatorIdx(flowchart_widget.data) + 1).toString();
       var operatorData = {
         top: 200,
         left: 200,
@@ -191,8 +216,6 @@ $(document).ready(function() {
           }
         }
       };
-      operatorI++;
-
       $chart.flowchart('createOperator', operatorId, operatorData);
     });
 
@@ -343,7 +366,12 @@ $(document).ready(function() {
             $link_edit.hide();
             return true;
         },
+        onOperatorMoved: function(OperatorId){
+            updateScreenSize();
+        }
     });
+
+    updateScreenSize();
 });
 </script>
 
