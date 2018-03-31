@@ -21,9 +21,9 @@
 
 var data = JSON.parse(`{{ chart.data | safe }}`);
 
-function showQuestion(tree, cur_op){
+function showQuestion(tree, cur_op, prev_ops){
     var links = tree.links;
-    if (cur_op == undefined){
+    if (cur_op == undefined || cur_op == null){
         // Assuming there is only one root
         var cur_op = rootOperatorIds(tree)[0];
     }
@@ -37,7 +37,19 @@ function showQuestion(tree, cur_op){
     $choices.empty();
     $choices.append($contents);
 
-    if (out_links.length == 0){ return; }
+    // 전단계로 option
+    if (prev_ops.length >= 1 || out_links.length == 0){
+        var $prev_button = $("<button type='button' class='choice btn btn-info'>전단계로</button>");
+        var _prev_ops = prev_ops.slice(); // copy
+
+        $prev_button.click(function(){
+            showQuestion(tree, _prev_ops[_prev_ops.length-1], _prev_ops.slice(0, -1));
+        });
+    }
+
+    if (out_links.length == 0){ $choices.append($prev_button); return; }
+
+    prev_ops.push(cur_op);
 
     for (idx in out_links){
         var link_id = out_links[idx];
@@ -46,9 +58,16 @@ function showQuestion(tree, cur_op){
         $button.text(links[link_id].text);
         $button.click(function(){
             var next_op = getNextOp(tree, $(this).data('id'));
-            showQuestion(tree, next_op);
+            // var _prev_ops = prev_ops.slice(); // copy
+            // _prev_ops.push(next_op);
+            showQuestion(tree, next_op, prev_ops);
         })
         $choices.append($button);
+    }
+
+    if (prev_ops.length >= 1){
+        $choices.append("<br>");
+        $choices.append($prev_button);
     }
 }
 {% endblock %}
@@ -59,7 +78,7 @@ function showQuestion(tree, cur_op){
 $('.start_question, .restart_question').click(function(){
     $('.start_question').hide();
     $('.restart_question').show();
-    showQuestion(window.data);
+    showQuestion(window.data, null, []);
 });
 
 {% endblock %}
