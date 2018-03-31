@@ -3,6 +3,7 @@
 
 
 {% block header %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.panzoom/3.2.2/jquery.panzoom.js"></script>
 <script src="{% static 'js/jquery.flowchart.js' %}"></script>
 <script src="{% static 'js/flowchart_utils.js' %}"></script>
 <link rel="stylesheet" href="{% static 'css/jquery.flowchart.css' %}">
@@ -299,6 +300,30 @@ $(".save").click(function(){
     //JSON.parse
 });
 
+var $container = $chart.parent();
+
+
+// Panzoom zoom handling...
+window.possibleZooms = [0.05, 0.1, 0.25, 0.5, 0.75, 1, 2, 3];
+window.currentZoom = 5;
+$chart.panzoom();
+$chart.panzoom('zoom', possibleZooms[currentZoom], {animate: true});
+
+// Centering panzoom
+// $chart.panzoom('pan', -cx + $container.width() / 2 , -cy + $container.height() / 2);
+
+
+$('.zoom').click(function(e){
+    var zoom_change = $(this).data('zoom');
+    window.currentZoom = Math.max(
+        0, Math.min(possibleZooms.length-1, currentZoom + zoom_change));
+    $chart.flowchart('setPositionRatio', possibleZooms[currentZoom]);
+    $chart.panzoom('zoom', possibleZooms[currentZoom], {
+        animate: true,
+        // focal: e
+    });
+})
+
 {% endblock %}
 </script>
 
@@ -331,31 +356,13 @@ $(".save").click(function(){
             </form>
             <button type="button" class="add_node btn btn-primary btn-sm">질문(또는 결과) 추가</button>
             <button type="button" class="delete_selected btn btn-primary btn-sm">선택한 질문/연결 삭제</button><br>
+            <button type="button" data-zoom="1" class="zoom btn btn-primary btn-sm">+</button>
+            <button type="button" data-zoom="-1" class="zoom btn btn-primary btn-sm">-</button><br>
             <button type="button" class="save btn btn-success btn-sm">저장후 종료</button>
             <a href="{% url 'chart_list' %}"><button type="button" class="btn btn-success btn-sm">종료</button></a>
-            {# <button type="button" class="get_data btn btn-primary">get data</button> #}
         </div>
     </div>
 </div>
-
-{% comment %}
-
-<div class="col-sm-12" style="height:50vh;">
-    <div class="row">
-        <div class="col-sm-3"></div>
-        <div class="col-sm-6">
-            <button type="button" class="start_question btn btn-primary">질문 시작</button>
-            <div class="question_choices">
-                <!-- for (i = 0; i < 20; i++) {
-                    var radioBtn = $('<input type="radio" name="rbtnCount" />');
-                    radioBtn.appendTo('#target');
-                } -->
-
-            </div>
-        <div class="col-sm-3"></div>
-    </div>
-</div>
-{% endcomment %}
 
 <div class="ensure-control-space"></div>
 
