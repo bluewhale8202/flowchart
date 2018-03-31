@@ -140,9 +140,11 @@ $('.start_question').click(function(){
 $(".add_node").click(function() {
   var operatorId = 'created_operator_' +
                    (lastOperatorIdx(flowchart_widget.data) + 1).toString();
+  var top = window.pageYOffset + 200;
+  var left = window.pageXOffset + 200;
   var operatorData = {
-    top: 200,
-    left: 200,
+    top: top,
+    left: left,
     properties: {
       title: '&nbsp;',
       contents: "클릭하여 내용을 입력해 주세요",
