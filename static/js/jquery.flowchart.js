@@ -713,7 +713,8 @@ $(function () {
                     fromSubConnector: this.lastOutputConnectorClicked.subConnector,
                     toOperator: operator,
                     toConnector: connector,
-                    toSubConnector: subConnector
+                    toSubConnector: subConnector,
+                    text: "Yes",
                 };
 
                 this.addLink(linkData);
