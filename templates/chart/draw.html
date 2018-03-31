@@ -1,7 +1,12 @@
 {% extends "base.html" %}
-<script>
+{% load static %}
+
 
 {% block header %}
+<script src="{% static 'js/jquery.flowchart.js' %}"></script>
+<script src="{% static 'js/flowchart_utils.js' %}"></script>
+<link rel="stylesheet" href="{% static 'css/jquery.flowchart.css' %}">
+
 <style>
 .control{
     background-color: #fafaff;
@@ -9,16 +14,27 @@
     position: fixed;
     z-index: 1;
 }
+.flowchart-operator-title{
+    height: 20px;
+}
 .operator_contents{
     overflow: hidden;
+    font-size: 0.8rem;
     max-height: 150px;
+}
+.flowchart-operator .flowchart-operator-inputs,
+.flowchart-default-operator .flowchart-operator-outputs {
+    width: 10%;
 }
 .btn {
     margin:1vh;
 }
 </style>
+
 {% endblock %}
 
+
+<script>
 {% block script %}
 // flowchart_utils.js functions
 // lastOperatorNum(tree)
@@ -70,7 +86,7 @@ function getTreeWidth(){
             max = ops[key]["left"];
         }
     }
-    return max + 400;
+    return max + 1000;
 }
 
 function resizeScreenWidthBy(amount){
@@ -116,11 +132,6 @@ $delete_selected.click(function() {
   $chart.flowchart('deleteSelected');
 });
 
-$('.get_data').click(function() {
-     var data = $chart.flowchart('getData');
-     console.log(data);
-});
-
 $('.start_question').click(function(){
     $('.start_question').hide();
     showQuestion(flowchart_widget.data);
@@ -152,83 +163,66 @@ $(".add_node").click(function() {
   $chart.flowchart('createOperator', operatorId, operatorData);
 });
 
+{% if chart %}
+var data = JSON.parse(`{{ chart.data | safe }}`);
+{% else %}
 var data = {
   "operators": {
     "created_operator_1": {
-      "top": 120,
-      "left": 100,
+      "top": 160,
+      "left": 120,
       "properties": {
-        "title": "-",
-        "contents": "created_operator_1 example content1",
+        "title": "&nbsp;",
+        "contents": "클릭하여 질문 내용을 바꿀 수 있습니다",
         "inputs": {
           "input_1": {
-            "label": "In",
+            "label": "",
             "multiple": true
           }
         },
         "outputs": {
           "output_1": {
-            "label": "Out",
+            "label": "",
             "multiple": true
           }
         }
       }
     },
     "created_operator_2": {
-      "top": 280,
+      "top": 60,
       "left": 440,
       "properties": {
-        "title": "-",
-        "contents": "example content for op 2",
+        "title": "&nbsp;",
+        "contents": "클릭하여 내용을 입력해 주세요",
         "inputs": {
           "input_1": {
-            "label": "In",
+            "label": "",
             "multiple": true
           }
         },
         "outputs": {
           "output_1": {
-            "label": "Out",
+            "label": "",
             "multiple": true
           }
         }
       }
     },
     "created_operator_3": {
-      "top": 40,
-      "left": 420,
+      "top": 280,
+      "left": 440,
       "properties": {
-        "title": "-",
-        "contents": "example contents for 3!",
+        "title": "&nbsp;",
+        "contents": "클릭하여 내용을 입력해 주세요",
         "inputs": {
           "input_1": {
-            "label": "In",
+            "label": "",
             "multiple": true
           }
         },
         "outputs": {
           "output_1": {
-            "label": "Out",
-            "multiple": true
-          }
-        }
-      }
-    },
-    "created_operator_6": {
-      "top": 140,
-      "left": 780,
-      "properties": {
-        "title": "-",
-        "contents": "example contents. six",
-        "inputs": {
-          "input_1": {
-            "label": "In",
-            "multiple": true
-          }
-        },
-        "outputs": {
-          "output_1": {
-            "label": "Out",
+            "label": "",
             "multiple": true
           }
         }
@@ -243,7 +237,7 @@ var data = {
       "toOperator": "created_operator_2",
       "toConnector": "input_1",
       "toSubConnector": 0,
-      "text": "머지"
+      "text": "Yes"
     },
     "1": {
       "fromOperator": "created_operator_1",
@@ -252,29 +246,12 @@ var data = {
       "toOperator": "created_operator_3",
       "toConnector": "input_1",
       "toSubConnector": 0,
-      "text": "Choice"
-    },
-    "2": {
-      "fromOperator": "created_operator_3",
-      "fromConnector": "output_1",
-      "fromSubConnector": 0,
-      "toOperator": "created_operator_6",
-      "toConnector": "input_1",
-      "toSubConnector": 0,
-      "text": "예쓰"
-    },
-    "3": {
-      "fromOperator": "created_operator_2",
-      "fromConnector": "output_1",
-      "fromSubConnector": 0,
-      "toOperator": "created_operator_6",
-      "toConnector": "input_1",
-      "toSubConnector": 1,
-      "text": "노우"
+      "text": "클릭하여 선택지 내용을 바꿀 수 있습니다"
     }
   },
   "operatorTypes": {}
 }
+{% endif %}
 
 $chart.flowchart({
     data: data,
@@ -304,10 +281,22 @@ $chart.flowchart({
     }
 });
 
+// control flowchart width
 updateScreenSize();
+
+// control flowchart height
 $( window ).resize(function(){
     $('.ensure-control-space').height($('.control').height() + 10);
 }).resize();
+
+$(".save").click(function(){
+    var data = $chart.flowchart('getData');
+
+    $("form input[name='data']").val(JSON.stringify(data));
+    $('form').find("input[type='submit']").click();
+    //JSON.parse
+});
+
 {% endblock %}
 </script>
 
@@ -333,10 +322,15 @@ $( window ).resize(function(){
             </div>
         </div>
         <div class="col-sm-4">
+            <form action="." method="post">
+                <input type="text" name="name" placeholder="여기에 제목을 입력해 주세요" required value="{{ chart.name }}">
+                <input type="text" name="data" style="display:none" >
+                <input type="submit" style="display:none" >
+            </form>
             <button type="button" class="add_node btn btn-primary btn-sm">질문(또는 결과) 추가</button>
-            <button type="button" class="delete_selected btn btn-primary btn-sm">선택한 질문/연결 삭제</button>
-            <button type="button" class="btn btn-success btn-sm">저장후 종료</button>
-            <button type="button" class="btn btn-success btn-sm">저장없이 종료</button>
+            <button type="button" class="delete_selected btn btn-primary btn-sm">선택한 질문/연결 삭제</button><br>
+            <button type="button" class="save btn btn-success btn-sm">저장후 종료</button>
+            <a href="{% url 'chart_list' %}"><button type="button" class="btn btn-success btn-sm">종료</button></a>
             {# <button type="button" class="get_data btn btn-primary">get data</button> #}
         </div>
     </div>
@@ -362,5 +356,6 @@ $( window ).resize(function(){
 {% endcomment %}
 
 <div class="ensure-control-space"></div>
+
 <div style="height:800px;" id="chart"></div>
 {% endblock %}

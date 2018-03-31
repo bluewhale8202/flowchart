@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block header %}
+<script src="{% static 'js/jquery.flowchart.js' %}"></script>
+<script src="{% static 'js/flowchart_utils.js' %}"></script>
+<link rel="stylesheet" href="{% static 'css/jquery.flowchart.css' %}">
+
+<style>
+.btn{
+    margin: 10px;
+}
+</style>
+
+{% endblock %}
+
+
+<script>
+{% block script %}
+
+var data = JSON.parse(`{{ chart.data | safe }}`);
+
+function showQuestion(tree, cur_op){
+    var links = tree.links;
+    if (cur_op == undefined){
+        // Assuming there is only one root
+        var cur_op = rootOperatorIds(tree)[0];
+    }
+
+    var contents = tree.operators[cur_op].properties.contents;
+    var $contents = $("<h5>"+contents+"</h5>")
+    $('.question_contents').text(contents);
+
+    var out_links = getOutLinks(tree, cur_op);
+    var $choices = $('.question_choices');
+    $choices.empty();
+    $choices.append($contents);
+
+    if (out_links.length == 0){ return; }
+
+    for (idx in out_links){
+        var link_id = out_links[idx];
+        var $button = $("<button type='button' class='choice btn btn-primary'></button>");
+        $button.data('id', link_id);
+        $button.text(links[link_id].text);
+        $button.click(function(){
+            var next_op = getNextOp(tree, $(this).data('id'));
+            showQuestion(tree, next_op);
+        })
+        $choices.append($button);
+    }
+}
+{% endblock %}
+
+
+{% block domready %}
+
+$('.start_question, .restart_question').click(function(){
+    $('.start_question').hide();
+    $('.restart_question').show();
+    showQuestion(window.data);
+});
+
+{% endblock %}
+</script>
+
+
+{% block content %}
+
+<div class="col-sm-12" style="height:50vh;">
+    <div style="height:100px"></div>
+    <div class="row">
+        <div class="col-sm-4"></div>
+        <div class="col-sm-4">
+            <h2 style="text-align:center">{{ chart.name }}</h2>
+        </div>
+    </div>
+    <div style="height:30px"></div>
+    <div class="row">
+        <div class="col-sm-4"></div>
+        <div class="col-sm-4" style="text-align:center">
+            <button type="button" class="start_question btn btn-primary">질문 시작</button>
+            <div class="question_choices">
+            </div>
+        </div>
+        <div class="col-sm-4"></div>
+    </div>
+</div>
+<div style="height:100px"></div>
+<div class="row">
+    <div class="col-sm-4"></div>
+    <div class="col-sm-4" style="text-align:center">
+        <button type="button" style="display:hidden" class="restart_question btn btn-success">다시 시작</button>
+        <a href="{% url 'edit_chart' chart.id %}">
+            <button type="button" class="btn btn-success">문답 수정</button>
+        </a>
+        <a href="{% url 'chart_list' %}">
+            <button type="button" class="btn btn-success">종료하기</button>
+        </a>
+    </div>
+</div>
+{% endblock %}
