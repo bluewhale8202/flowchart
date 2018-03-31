@@ -6,6 +6,8 @@
 .control{
     background-color: #fafaff;
     padding: 10px;
+    position: fixed;
+    z-index: 1;
 }
 .operator_contents{
     overflow: hidden;
@@ -97,7 +99,7 @@ $contents_edit.find("button").click(function(){
     var contents = $contents_edit.find("textarea").val()
     if (selectedOperatorId != null) {
         $chart.flowchart('setOperatorContents', selectedOperatorId, contents);
-        $contents_edit.hide();
+        $contents_edit.css('visibility','hidden');
     }
 });
 
@@ -106,7 +108,7 @@ $link_edit.find("button").click(function(){
     var contents = $link_edit.find("textarea").val()
     if (selectedLinkId != null) {
         $chart.flowchart('setLinkText', selectedLinkId, contents);
-        $link_edit.hide();
+        $link_edit.css('visibility','hidden');
     }
 });
 
@@ -131,8 +133,8 @@ $(".add_node").click(function() {
     top: 200,
     left: 200,
     properties: {
-      title: '-',
-      contents: "example contents",
+      title: '&nbsp;',
+      contents: "클릭하여 내용을 입력해 주세요",
       inputs: {
         input_1: {
           label: '',
@@ -277,24 +279,24 @@ var data = {
 $chart.flowchart({
     data: data,
     onOperatorSelect: function(operatorId) {
-        $contents_edit.show();
+        $contents_edit.css('visibility','visible');
         $contents_edit.find("textarea")
             .val($chart.flowchart('getOperatorContents', operatorId));
         return true;
     },
     onOperatorUnselect: function(operatorId) {
-        $contents_edit.hide();
+        $contents_edit.css('visibility','hidden');
         return true;
     },
     onLinkSelect: function(linkId) {
         console.log("link selected: " + linkId);
-        $link_edit.show();
+        $link_edit.css('visibility','visible');
         $link_edit.find("textarea")
             .val($chart.flowchart('getLinkText', linkId));
         return true;
     },
     onLinkUnselect: function(linkId) {
-        $link_edit.hide();
+        $link_edit.css('visibility','hidden');
         return true;
     },
     onOperatorMoved: function(OperatorId){
@@ -303,42 +305,44 @@ $chart.flowchart({
 });
 
 updateScreenSize();
+$( window ).resize(function(){
+    $('.ensure-control-space').height($('.control').height() + 10);
+}).resize();
 {% endblock %}
 </script>
 
 
 {% block content %}
-<div style="width:1500px; height:500px;" id="chart"></div>
-
 <div class="container control col-sm-12">
     <div class="row">
         <div class="col-sm-1"></div>
-        <div class="col-sm-4">
-            <div class="contents_edit" style="display:none">
-                <h5>내용 설정</h5>
+        <div class="col-sm-5">
+            <div class="contents_edit" style="visibility:hidden">
+                <h5>내용 변경 <button type="button" class="btn btn-primary btn-sm">확인</button></h5>
                 <div class="row">
-                    <textarea type="text" class="col-sm-12" rows="8"></textarea>
+                    <textarea type="text" class="col-sm-12" rows="3"></textarea>
                 </div>
-                <button type="button" class="btn btn-primary">확인</button>
             </div>
         </div>
-        <div class="col-sm-3">
-            <div class="link_edit" style="display:none">
-                <h5>링크(선택지) 설정</h5>
+        <div class="col-sm-2">
+            <div class="link_edit" style="visibility:hidden">
+                <h5>선택지 변경 <button type="button" class="btn btn-primary btn-sm">확인</button></h5>
                 <div class="row">
                     <textarea type="text" class="col-sm-12"></textarea>
                 </div>
-                <button type="button" class="btn btn-primary">변경</button>
             </div>
         </div>
-        <div class="col-sm-3">
-            <button type="button" class="add_node btn btn-primary">질문(혹은 최종결과) 추가</button>
-            <button type="button" class="delete_selected btn btn-primary">선택한 질문/링크 삭제</button>
-            <button type="button" class="get_data btn btn-primary">get data</button>
+        <div class="col-sm-4">
+            <button type="button" class="add_node btn btn-primary btn-sm">질문(또는 결과) 추가</button>
+            <button type="button" class="delete_selected btn btn-primary btn-sm">선택한 질문/연결 삭제</button>
+            <button type="button" class="btn btn-success btn-sm">저장후 종료</button>
+            <button type="button" class="btn btn-success btn-sm">저장없이 종료</button>
+            {# <button type="button" class="get_data btn btn-primary">get data</button> #}
         </div>
-        <div class="col-sm-1"></div>
     </div>
 </div>
+
+{% comment %}
 
 <div class="col-sm-12" style="height:50vh;">
     <div class="row">
@@ -355,4 +359,8 @@ updateScreenSize();
         <div class="col-sm-3"></div>
     </div>
 </div>
+{% endcomment %}
+
+<div class="ensure-control-space"></div>
+<div style="height:800px;" id="chart"></div>
 {% endblock %}
