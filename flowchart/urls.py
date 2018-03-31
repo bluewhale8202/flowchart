@@ -16,9 +16,11 @@ Including another URLconf
 
 from django.conf.urls import include, url
 from django.contrib import admin
-from django.urls import path
+from django.views.generic.base import RedirectView
+from django.urls import path, reverse_lazy
 
 urlpatterns = [
     path('chart/', include('chart.urls')),
     path('admin/', admin.site.urls),
+    path('', RedirectView.as_view(url=reverse_lazy('chart_list'))),
 ]
