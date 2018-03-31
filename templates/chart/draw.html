@@ -1,0 +1,358 @@
+{% extends "base.html" %}
+<script>
+
+{% block header %}
+<style>
+.control{
+    background-color: #fafaff;
+    padding: 10px;
+}
+.operator_contents{
+    overflow: hidden;
+    max-height: 150px;
+}
+.btn {
+    margin:1vh;
+}
+</style>
+{% endblock %}
+
+{% block script %}
+// flowchart_utils.js functions
+// lastOperatorNum(tree)
+// rootOperatorIds(tree)
+// getOutLinks(tree, cur_op_id)
+// getNextOp(tree, link_id)
+
+function showQuestion(tree, cur_op){
+    var links = tree.links;
+    if (cur_op == undefined){
+        // Assuming there is only one root
+        var cur_op = rootOperatorIds(tree)[0];
+    }
+
+    var contents = tree.operators[cur_op].properties.contents;
+    var $contents = $("<h5>"+contents+"</h5>")
+    $('.question_contents').text(contents);
+
+    var out_links = getOutLinks(tree, cur_op);
+    var $choices = $('.question_choices');
+    $choices.empty();
+    $choices.append($contents);
+
+    if (out_links.length == 0){ return; }
+
+    for (idx in out_links){
+        var link_id = out_links[idx];
+        var $button = $("<button type='button' class='choice col-sm-3 btn btn-primary'></button>");
+        $button.data('id', link_id);
+        $button.text(links[link_id].text);
+        $button.click(function(){
+            var tree = flowchart_widget.data;
+            var next_op = getNextOp(tree, $(this).data('id'));
+            showQuestion(tree, next_op);
+        })
+        $choices.append($button);
+    }
+}
+
+function getScreenWidth(){
+    return parseInt($(".flowchart-container").css("width").slice(0, -2));
+}
+
+function getTreeWidth(){
+    var ops =  flowchart_widget.data.operators;
+    var max = 0;
+    for (key in ops){
+        if (ops[key]["left"] > max){
+            max = ops[key]["left"];
+        }
+    }
+    return max + 400;
+}
+
+function resizeScreenWidthBy(amount){
+    var cur_width = getScreenWidth();
+    $(".flowchart-container").css("width", String(cur_width+amount)+"px");
+}
+
+function updateScreenSize(){
+    var screen = getScreenWidth();
+    var tree = getTreeWidth();
+    resizeScreenWidthBy(tree-screen);
+}
+{% endblock %}
+
+
+{% block domready %}
+var $chart = $('#chart');
+// window.flowchart_widget is automatically created by flowchart constructor
+var $contents_edit = $(".contents_edit");
+var $link_edit = $(".link_edit");
+var $delete_selected = $("button.delete_selected");
+
+// Event binding should be done after dom ready
+$contents_edit.find("button").click(function(){
+    var selectedOperatorId = $chart.flowchart('getSelectedOperatorId');
+    var contents = $contents_edit.find("textarea").val()
+    if (selectedOperatorId != null) {
+        $chart.flowchart('setOperatorContents', selectedOperatorId, contents);
+        $contents_edit.hide();
+    }
+});
+
+$link_edit.find("button").click(function(){
+    var selectedLinkId = $chart.flowchart('getSelectedLinkId');
+    var contents = $link_edit.find("textarea").val()
+    if (selectedLinkId != null) {
+        $chart.flowchart('setLinkText', selectedLinkId, contents);
+        $link_edit.hide();
+    }
+});
+
+$delete_selected.click(function() {
+  $chart.flowchart('deleteSelected');
+});
+
+$('.get_data').click(function() {
+     var data = $chart.flowchart('getData');
+     console.log(data);
+});
+
+$('.start_question').click(function(){
+    $('.start_question').hide();
+    showQuestion(flowchart_widget.data);
+})
+
+$(".add_node").click(function() {
+  var operatorId = 'created_operator_' +
+                   (lastOperatorIdx(flowchart_widget.data) + 1).toString();
+  var operatorData = {
+    top: 200,
+    left: 200,
+    properties: {
+      title: '-',
+      contents: "example contents",
+      inputs: {
+        input_1: {
+          label: '',
+          multiple: true,
+        }
+      },
+      outputs: {
+        output_1: {
+          label: '',
+          multiple: true,
+        }
+      }
+    }
+  };
+  $chart.flowchart('createOperator', operatorId, operatorData);
+});
+
+var data = {
+  "operators": {
+    "created_operator_1": {
+      "top": 120,
+      "left": 100,
+      "properties": {
+        "title": "-",
+        "contents": "created_operator_1 example content1",
+        "inputs": {
+          "input_1": {
+            "label": "In",
+            "multiple": true
+          }
+        },
+        "outputs": {
+          "output_1": {
+            "label": "Out",
+            "multiple": true
+          }
+        }
+      }
+    },
+    "created_operator_2": {
+      "top": 280,
+      "left": 440,
+      "properties": {
+        "title": "-",
+        "contents": "example content for op 2",
+        "inputs": {
+          "input_1": {
+            "label": "In",
+            "multiple": true
+          }
+        },
+        "outputs": {
+          "output_1": {
+            "label": "Out",
+            "multiple": true
+          }
+        }
+      }
+    },
+    "created_operator_3": {
+      "top": 40,
+      "left": 420,
+      "properties": {
+        "title": "-",
+        "contents": "example contents for 3!",
+        "inputs": {
+          "input_1": {
+            "label": "In",
+            "multiple": true
+          }
+        },
+        "outputs": {
+          "output_1": {
+            "label": "Out",
+            "multiple": true
+          }
+        }
+      }
+    },
+    "created_operator_6": {
+      "top": 140,
+      "left": 780,
+      "properties": {
+        "title": "-",
+        "contents": "example contents. six",
+        "inputs": {
+          "input_1": {
+            "label": "In",
+            "multiple": true
+          }
+        },
+        "outputs": {
+          "output_1": {
+            "label": "Out",
+            "multiple": true
+          }
+        }
+      }
+    }
+  },
+  "links": {
+    "0": {
+      "fromOperator": "created_operator_1",
+      "fromConnector": "output_1",
+      "fromSubConnector": 0,
+      "toOperator": "created_operator_2",
+      "toConnector": "input_1",
+      "toSubConnector": 0,
+      "text": "머지"
+    },
+    "1": {
+      "fromOperator": "created_operator_1",
+      "fromConnector": "output_1",
+      "fromSubConnector": 1,
+      "toOperator": "created_operator_3",
+      "toConnector": "input_1",
+      "toSubConnector": 0,
+      "text": "Choice"
+    },
+    "2": {
+      "fromOperator": "created_operator_3",
+      "fromConnector": "output_1",
+      "fromSubConnector": 0,
+      "toOperator": "created_operator_6",
+      "toConnector": "input_1",
+      "toSubConnector": 0,
+      "text": "예쓰"
+    },
+    "3": {
+      "fromOperator": "created_operator_2",
+      "fromConnector": "output_1",
+      "fromSubConnector": 0,
+      "toOperator": "created_operator_6",
+      "toConnector": "input_1",
+      "toSubConnector": 1,
+      "text": "노우"
+    }
+  },
+  "operatorTypes": {}
+}
+
+$chart.flowchart({
+    data: data,
+    onOperatorSelect: function(operatorId) {
+        $contents_edit.show();
+        $contents_edit.find("textarea")
+            .val($chart.flowchart('getOperatorContents', operatorId));
+        return true;
+    },
+    onOperatorUnselect: function(operatorId) {
+        $contents_edit.hide();
+        return true;
+    },
+    onLinkSelect: function(linkId) {
+        console.log("link selected: " + linkId);
+        $link_edit.show();
+        $link_edit.find("textarea")
+            .val($chart.flowchart('getLinkText', linkId));
+        return true;
+    },
+    onLinkUnselect: function(linkId) {
+        $link_edit.hide();
+        return true;
+    },
+    onOperatorMoved: function(OperatorId){
+        updateScreenSize();
+    }
+});
+
+updateScreenSize();
+{% endblock %}
+</script>
+
+
+{% block content %}
+<div style="width:1500px; height:500px;" id="chart"></div>
+
+<div class="container control col-sm-12">
+    <div class="row">
+        <div class="col-sm-1"></div>
+        <div class="col-sm-4">
+            <div class="contents_edit" style="display:none">
+                <h5>내용 설정</h5>
+                <div class="row">
+                    <textarea type="text" class="col-sm-12" rows="8"></textarea>
+                </div>
+                <button type="button" class="btn btn-primary">확인</button>
+            </div>
+        </div>
+        <div class="col-sm-3">
+            <div class="link_edit" style="display:none">
+                <h5>링크(선택지) 설정</h5>
+                <div class="row">
+                    <textarea type="text" class="col-sm-12"></textarea>
+                </div>
+                <button type="button" class="btn btn-primary">변경</button>
+            </div>
+        </div>
+        <div class="col-sm-3">
+            <button type="button" class="add_node btn btn-primary">질문(혹은 최종결과) 추가</button>
+            <button type="button" class="delete_selected btn btn-primary">선택한 질문/링크 삭제</button>
+            <button type="button" class="get_data btn btn-primary">get data</button>
+        </div>
+        <div class="col-sm-1"></div>
+    </div>
+</div>
+
+<div class="col-sm-12" style="height:50vh;">
+    <div class="row">
+        <div class="col-sm-3"></div>
+        <div class="col-sm-6">
+            <button type="button" class="start_question btn btn-primary">질문 시작</button>
+            <div class="question_choices">
+                <!-- for (i = 0; i < 20; i++) {
+                    var radioBtn = $('<input type="radio" name="rbtnCount" />');
+                    radioBtn.appendTo('#target');
+                } -->
+
+            </div>
+        <div class="col-sm-3"></div>
+    </div>
+</div>
+{% endblock %}
