@@ -167,8 +167,42 @@ $(".add_node").click(function() {
   $chart.flowchart('createOperator', operatorId, operatorData);
 });
 
+var options = {
+    // data: data,
+    onOperatorSelect: function(operatorId) {
+        $contents_edit.css('visibility','visible');
+        $contents_edit.find("textarea")
+            .val($chart.flowchart('getOperatorContents', operatorId));
+        return true;
+    },
+    onOperatorUnselect: function(operatorId) {
+        $contents_edit.css('visibility','hidden');
+        return true;
+    },
+    onLinkSelect: function(linkId) {
+        console.log("link selected: " + linkId);
+        $link_edit.css('visibility','visible');
+        $link_edit.find("textarea")
+            .val($chart.flowchart('getLinkText', linkId));
+        return true;
+    },
+    onLinkUnselect: function(linkId) {
+        $link_edit.css('visibility','hidden');
+        return true;
+    },
+    onOperatorMoved: function(OperatorId){
+        updateScreenSize();
+    }
+};
+
 {% if chart %}
-var data = JSON.parse(`{{ chart.data | safe }}`);
+$.get("{% url 'get_chart' chart.id %}",
+      {},
+      function(data){
+          options.data = data;
+          $chart.flowchart(options);
+          updateScreenSize();
+      });
 {% else %}
 var data = {
   "operators": {
@@ -255,38 +289,13 @@ var data = {
   },
   "operatorTypes": {}
 }
-{% endif %}
-
-$chart.flowchart({
-    data: data,
-    onOperatorSelect: function(operatorId) {
-        $contents_edit.css('visibility','visible');
-        $contents_edit.find("textarea")
-            .val($chart.flowchart('getOperatorContents', operatorId));
-        return true;
-    },
-    onOperatorUnselect: function(operatorId) {
-        $contents_edit.css('visibility','hidden');
-        return true;
-    },
-    onLinkSelect: function(linkId) {
-        console.log("link selected: " + linkId);
-        $link_edit.css('visibility','visible');
-        $link_edit.find("textarea")
-            .val($chart.flowchart('getLinkText', linkId));
-        return true;
-    },
-    onLinkUnselect: function(linkId) {
-        $link_edit.css('visibility','hidden');
-        return true;
-    },
-    onOperatorMoved: function(OperatorId){
-        updateScreenSize();
-    }
-});
+options.data = data;
+$chart.flowchart(options);
 
 // control flowchart width
 updateScreenSize();
+{% endif %}
+
 
 // control flowchart height
 $( window ).resize(function(){

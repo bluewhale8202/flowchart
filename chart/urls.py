@@ -9,4 +9,5 @@ urlpatterns = [
     path('create_chart/', views.create_chart, name='create_chart'),
     path('edit_chart/<int:chart_id>/', views.edit_chart, name='edit_chart'),
     path('delete_chart/<int:chart_id>/', views.delete_chart, name='delete_chart'),
+    path('get_chart/<int:chart_id>/', views.get_chart, name='get_chart'),
 ]

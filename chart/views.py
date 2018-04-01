@@ -33,7 +33,15 @@ def edit_chart(request, chart_id):
         chart.data = request.POST['data']
         chart.save()
         return redirect('chart_list')
-    return render(request, 'chart/draw.html', {'chart': chart})
+    return render(request, 'chart/draw.html', {"chart": chart})
+
+
+from django.http import JsonResponse
+import json
+@csrf_exempt
+def get_chart(request, chart_id):
+    chart = get_object_or_404(Chart, id=chart_id)
+    return JsonResponse(json.loads(chart.data))
 
 
 def delete_chart(request, chart_id):
