@@ -84,29 +84,29 @@ function showQuestion(tree, cur_op, prev_ops){
 
 {% block content %}
 
-<div class="col-sm-12" style="height:50vh;">
+<div class="col-sm-12">
     <div style="height:100px"></div>
     <div class="row">
-        <div class="col-sm-4"></div>
-        <div class="col-sm-4">
+        <div class="col-sm-2"></div>
+        <div class="col-sm-8">
             <h2 style="text-align:center">{{ chart.name }}</h2>
         </div>
     </div>
     <div style="height:30px"></div>
     <div class="row">
-        <div class="col-sm-4"></div>
-        <div class="col-sm-4" style="text-align:center">
+        <div class="col-sm-2"></div>
+        <div class="col-sm-8" style="text-align:center">
             <button type="button" class="start_question btn btn-primary">질문 시작</button>
             <div class="question_choices">
             </div>
         </div>
-        <div class="col-sm-4"></div>
+        <div class="col-sm-2"></div>
     </div>
 </div>
 <div style="height:100px"></div>
 <div class="row">
-    <div class="col-sm-4"></div>
-    <div class="col-sm-4" style="text-align:center">
+    <div class="col-sm-2"></div>
+    <div class="col-sm-8" style="text-align:center">
         <button type="button" style="display:hidden" class="restart_question btn btn-success">다시 시작</button>
         <a href="{% url 'edit_chart' chart.id %}">
             <button type="button" class="btn btn-success">문답 수정</button>
